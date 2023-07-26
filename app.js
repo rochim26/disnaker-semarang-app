@@ -16,37 +16,9 @@ app.use(bodyParser.json());
 const url = "https://disnaker.semarangkota.go.id/user/daftarLowongan";
 
 // Function to scrape job listings from the provided URL
-async function scrapeJobListings() {
+async function scrapeJobListings(html) {
   try {
-    const response = await axios.get(url);
-    const $ = cheerio.load(response.data);
-
-    const jobListings = [];
-
-    // Customize the selector according to your HTML structure
-    $(".card-lowongan-baru").each((index, element) => {
-      const title = $(element).find(".card-header").text().trim();
-      const company = $(element).find("img").attr("src");
-      const id = $(element).find("input[type='button']").attr("id");
-      const endDate = $(element)
-        .find(".card-title")
-        .text()
-        .trim()
-        .replace("Batas Lowongan", "");
-      jobListings.push({ title, company, endDate, id });
-    });
-
-    return jobListings;
-  } catch (error) {
-    console.error("Error scraping data:", error.message);
-    return [];
-  }
-}
-
-// Function to scrape job listings from the search results page
-async function scrapeJobListingsSearch(htmlString) {
-  try {
-    const $ = cheerio.load(htmlString);
+    const $ = cheerio.load(html);
 
     const jobListings = [];
 
@@ -74,7 +46,9 @@ app.set("view engine", "ejs");
 
 // Route to display the job listings on the homepage
 app.get("/", async (req, res) => {
-  const jobListings = await scrapeJobListings();
+  const response = await axios.get(url);
+
+  const jobListings = await scrapeJobListings(response.data);
   res.render("index", { jobListings });
 });
 
@@ -124,7 +98,7 @@ app.get("/cari-lowongan", async (req, res) => {
     // Use Cheerio to parse the HTML content
     const html = response.data;
 
-    const jobListings = await scrapeJobListingsSearch(html);
+    const jobListings = await scrapeJobListings(html);
 
     // Render the .ejs template and pass the job listings data
     res.render("cari-lowongan", { jobListings, keyword });
