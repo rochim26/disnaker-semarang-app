@@ -21,6 +21,7 @@ async function scrapeJobListings(html) {
     const $ = cheerio.load(html);
 
     const jobListings = [];
+    const pages = [];
 
     // Customize the selector according to your HTML structure
     $(".card-lowongan-baru").each((index, element) => {
@@ -35,7 +36,17 @@ async function scrapeJobListings(html) {
       jobListings.push({ title, company, endDate, id });
     });
 
-    return jobListings;
+    // Customize the selector according to your HTML structure
+    $(".page-item").each((index, element) => {
+      const href = $(element).find("a").attr("href");
+      const page = $(element).find("a").text().trim();
+      const srOnly = $(element).find(".sr-only").text().trim();
+      pages.push({ href, page, srOnly });
+    });
+
+    pages.pop();
+
+    return { jobListings, pages };
   } catch (error) {
     console.error("Error scraping data:", error.message);
     return [];
@@ -49,6 +60,7 @@ app.get("/", async (req, res) => {
   const response = await axios.get(url);
 
   const jobListings = await scrapeJobListings(response.data);
+
   res.render("index", { jobListings });
 });
 

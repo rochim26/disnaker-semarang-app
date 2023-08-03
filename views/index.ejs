@@ -91,6 +91,66 @@
       .search-form button:hover {
         background-color: #a10f15;
       }
+
+      .pagination-container {
+        overflow-x: hidden; /* Hide horizontal overflow */
+        position: relative;
+      }
+
+      .pagination {
+        display: flex;
+        list-style: none;
+        padding: 0;
+        margin: 0;
+        overflow-x: hidden; /* Hide horizontal overflow */
+      }
+
+      .page-item {
+        margin-right: 10px; /* Add some spacing between pagination items */
+      }
+
+      .scroll-left-btn,
+      .scroll-right-btn {
+        position: absolute;
+        top: 0;
+        bottom: 0;
+        display: flex;
+        align-items: center;
+        background: transparent;
+        border: none;
+        cursor: pointer;
+        z-index: 1;
+        background-color: #fff;
+        box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+        border-radius: 4px;
+        padding: 8px 12px;
+        transition: background-color 0.3s, box-shadow 0.3s;
+      }
+
+      .scroll-left-btn:hover,
+      .scroll-right-btn:hover {
+        /* Change the styles when hovering over the button */
+        background-color: #f0f0f0;
+        box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+      }
+
+      .scroll-left-btn {
+        left: 0;
+      }
+
+      .scroll-right-btn {
+        right: 0;
+      }
+
+      .page-link {
+        text-decoration: none;
+        color: #333;
+      }
+
+      /* Optional styles to highlight the active page */
+      .page-item.active .page-link {
+        font-weight: bold;
+      }
     </style>
   </head>
   <body>
@@ -152,7 +212,7 @@
       <h1 class="my-4">Daftar Lowongan Pekerjaan</h1>
 
       <div class="job-listings-container">
-        <% jobListings.forEach((job) => { %>
+        <% jobListings.jobListings.forEach((job) => { %>
         <div class="job-listing-card">
           <img src="<%= job.company %>" alt="logo" />
           <h3><%= job.title %></h3>
@@ -162,6 +222,26 @@
           </button>
         </div>
         <% }) %>
+      </div>
+
+      <div class="pagination-container">
+        <nav aria-label="Page navigation">
+          <button class="scroll-left-btn">&lt;</button>
+          <ul class="pagination">
+            <% jobListings.pages.forEach((page) => { %>
+            <li class="page-item">
+              <a
+                class="page-link"
+                href="?<%= page.href ? page.href.split('/').pop() : '#' %>"
+                aria-label="Page <%= page.page %>"
+              >
+                <span aria-hidden="true"><%= page.srOnly + page.page %></span>
+              </a>
+            </li>
+            <% }) %>
+          </ul>
+          <button class="scroll-right-btn">&gt;</button>
+        </nav>
       </div>
     </div>
 
@@ -217,6 +297,20 @@
         $(".detailButton").on("click", function () {
           const id = $(this).attr("data-id");
           getDetailLowongan(id);
+        });
+
+        const container = $(".pagination-container");
+        const pagination = container.find(".pagination");
+        const scrollStep = 100; // Adjust scroll step as needed
+
+        // Handle left button click
+        container.find(".scroll-left-btn").on("click", function () {
+          pagination.animate({ scrollLeft: "-=" + scrollStep }, 500);
+        });
+
+        // Handle right button click
+        container.find(".scroll-right-btn").on("click", function () {
+          pagination.animate({ scrollLeft: "+=" + scrollStep }, 500);
         });
       });
     </script>
