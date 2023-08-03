@@ -57,7 +57,16 @@ app.set("view engine", "ejs");
 
 // Route to display the job listings on the homepage
 app.get("/", async (req, res) => {
-  const response = await axios.get(url);
+  const page = req.query.page;
+
+  let response = "";
+
+  if (page) {
+    const url = `https://disnaker.semarangkota.go.id/User/daftarLowongan/${page}`;
+    response = await axios.get(url);
+  } else {
+    response = await axios.get(url);
+  }
 
   const jobListings = await scrapeJobListings(response.data);
 
@@ -92,20 +101,27 @@ app.post("/get_detail_lowongan", async (req, res) => {
 
 // Route to display the search results page with job listings based on keyword search
 app.get("/cari-lowongan", async (req, res) => {
-  const { keyword } = req.query;
+  const { keyword, page } = req.query;
 
   try {
     // Create a new FormData instance
     const formData = new FormData();
     formData.append("keyword", keyword);
 
-    const response = await axios.post(
-      "https://disnaker.semarangkota.go.id/user/search_lowongan",
-      formData,
-      {
-        headers: formData.getHeaders(), // Set appropriate headers for multipart/form-data
-      }
-    );
+    let response = "";
+
+    if (page) {
+      const url = `https://disnaker.semarangkota.go.id/User/daftarLowongan/${page}`;
+      response = await axios.get(url);
+    } else {
+      response = await axios.post(
+        "https://disnaker.semarangkota.go.id/user/search_lowongan",
+        formData,
+        {
+          headers: formData.getHeaders(), // Set appropriate headers for multipart/form-data
+        }
+      );
+    }
 
     // Use Cheerio to parse the HTML content
     const html = response.data;

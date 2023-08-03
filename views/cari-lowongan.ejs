@@ -243,7 +243,7 @@
             <li class="page-item">
               <a
                 class="page-link"
-                href="<%= page.href ? '/page/' + page.href.split('/').pop() : '#' %>"
+                href="?keyword=<%= keyword %>&page=<%= page.href ? page.href.split('/').pop() : '#' %>"
                 aria-label="Page <%= page.page %>"
               >
                 <span aria-hidden="true"><%= page.srOnly + page.page %></span>
